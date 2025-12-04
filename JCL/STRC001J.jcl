@@ -2,7 +2,7 @@
 //*--------------------------------------------------------------------*
 //* COMPILE, LINK, AND EXECUTE A COBOL REPORT PROGRAM FOR Z/OS (MANU)
 //*--------------------------------------------------------------------*
-//STEP1    EXEC PROC=IGYWCL
+//STEP1    EXEC PROC=IGYWCLG
 //COBOL.SYSIN   DD DSN=&SYSUID..CBL(CBLJSON),DISP=SHR
 //COBOL.SYSLIB  DD DSN=&SYSUID..COPYLIB,DISP=SHR
 //*--------------------------------------------------------------------*
