@@ -1,3 +1,5 @@
 # STRC00X
 
-A COBOL structure listing generation tool
+A COBOL program structure listing generation tool 
+
+More README informating incoming
