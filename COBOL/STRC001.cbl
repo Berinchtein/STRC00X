@@ -1,19 +1,19 @@
       *****************************************************************
-      * Program name:    RPT0001
+      * Program name:    STRC001
       * Original author: MANUEL JARRY
       *
       * Maintenence Log
       * Date       Author        Maintenance Requirement
       * ---------- ------------  ---------------------------------------
-      * 31/01/2026 MANUEL JARRY  Created for RPT000X
+      * 25/11/2025 MANUEL JARRY  Created for COBOL-Learning
       *
       *****************************************************************
        IDENTIFICATION DIVISION.
-       PROGRAM-ID.  RPT0001.
+       PROGRAM-ID.  STRC001.
        AUTHOR. MANUEL JARRY Z85614.
        INSTALLATION. IBM Z Xplore Learning Platform.
-       DATE-WRITTEN. 31/01/2026.
-       DATE-COMPILED. DD/02/2026.
+       DATE-WRITTEN. 25/11/2025.
+       DATE-COMPILED. DD/11/2025.
        SECURITY. NON-CONFIDENTIAL.
       *****************************************************************
       *
@@ -24,8 +24,14 @@
        OBJECT-COMPUTER. IBM-Z.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT COBLPROG ASSIGN  TO COBLPROG.
-           SELECT STRCCHRT ASSIGN TO STRCCHRT.
+      *
+           SELECT COBLPROG
+              ASSIGN TO "INPUT-FILES/COBLPROG"
+              ORGANIZATION IS SEQUENTIAL.
+      *
+           SELECT STRCCHRT
+              ASSIGN TO "OUTPUT-FILES/STRCCHRT"
+              ORGANIZATION IS SEQUENTIAL.
       *****************************************************************
       *
       *****************************************************************
@@ -33,9 +39,7 @@
        FILE SECTION.
       *
        FD  COBLPROG.
-       01 OLD-PROCEDURE-INFORMATIONS.
-          05 OLD-SEQUENCE-NUMBER      PIC 9(3).
-          05 OLD-PROCEDURE-NAME       PIC X(26).
+       01 CURRENT-COBLPROG-LINE       PIC X(72).
       *
        FD  STRCCHRT.
        01 PRINT-AREA                  PIC X(132).
@@ -45,8 +49,15 @@
        01 SWITCHES.
           05 COBLPROG-EOF-SWITCH      PIC X      VALUE "N".
              88 COBLPROG-EOF                     VALUE "Y".
+      *   05 PROCEDURE-DIV-REACHED-SWITCH        VALUE "N".
+      *      88 PROCEDURE-DIV-REACHED            VALUE "Y".
       *
-       01 PRINT-FIELDS.
+       01 WORK-FIELDS.
+          05 CURRENT-LINE-PERFORM-COUNT   PIC 9 VALUE 0.
+             88 CURRENT-LINE-HAS-PERFORM        VALUE 1 THROUGH 100.
+          05 PROCEDURE-DIVISION-COUNT     PIC 9 VALUE 0.
+             88 PROCEDURE-DIV-REACHED           VALUE 1 THROUGH 100.
+          05 CURRENT-PROCEDURE-NAME       PIC X(36).
       *
        01 CURRENT-DATE-AND-TIME.
           05 CURRENT-DATE.
@@ -85,13 +96,11 @@
           05 FILLER                   PIC X(124) VALUE SPACE.
       *
        01 NEW-PROCEDURE-INFORMATIONS.
-      *   05 TABULATION               PIC X(3)     VALUE SPACE.
           05 NEW-SEQUENCE-NUMBER      PIC 9(3).
           05 FILLER                   PIC X(1)   VALUE SPACE.
           05 NEW-PROCEDURE-NAME       PIC X(26).
           05 FILLER                   PIC X(1)   VALUE SPACE.
           05 NEW-COMMON-MODULE        PIC X(3)   VALUE "(c)".
-      *   05 FILLER                   PIC X(98)    VALUE SPACE.
       *
        01 FOOTER-LINE.
           05 FILLER                   PIC X(7)   VALUE SPACE.
@@ -132,7 +141,7 @@
            MOVE CD-CURRENT-MINUTES TO HL2-MINUTES.
            MOVE "TESTPROG" TO HL3-PROGRAM-NAME. *> TMP
       *
-       200-PRINT-HEADING-LINEs.
+       200-PRINT-HEADING-LINES.
            MOVE HEADING-LINE-1 TO PRINT-AREA.
            WRITE PRINT-AREA. *> AFTER ADVANCING PAGE.
            MOVE HEADING-LINE-2 TO PRINT-AREA.
@@ -142,22 +151,43 @@
       *
        300-PREPARE-PROCEDURE-LINES.
            PERFORM 310-READ-COBOL-PROGRAM.
+           PERFORM 312-DETECT-PROCEDURE-DIVISION.
+           IF (PROCEDURE-DIV-REACHED)
+              PERFORM 315-DETECT-PROCEDURE-NAME
+           END-IF.
+      *
+       310-READ-COBOL-PROGRAM.
+           READ COBLPROG INTO CURRENT-COBLPROG-LINE
+           AT END
+              MOVE "Y" TO COBLPROG-EOF-SWITCH.
+           DISPLAY "LIGNE: " CURRENT-COBLPROG-LINE.
+           MOVE FUNCTION UPPER-CASE (CURRENT-COBLPROG-LINE)
+              TO CURRENT-COBLPROG-LINE.
+      *
+       312-DETECT-PROCEDURE-DIVISION.
+           INSPECT CURRENT-COBLPROG-LINE TALLYING
+              PROCEDURE-DIVISION-COUNT FOR ALL "PROCEDURE DIVISION".
+      *
+       315-DETECT-PROCEDURE-NAME.
+           MOVE ZERO TO CURRENT-LINE-PERFORM-COUNT.
+           INSPECT CURRENT-COBLPROG-LINE TALLYING
+              CURRENT-LINE-PERFORM-COUNT FOR ALL "PERFORM".
+           IF (CURRENT-LINE-HAS-PERFORM)
+              PERFORM 317-EXTRACT-PROCEDURE-NAME
+           END-IF.
+      *
+       317-EXTRACT-PROCEDURE-NAME.
+           UNSTRING CURRENT-COBLPROG-LINE DELIMITED BY ALL " "
+              INTO CURRENT-PROCEDURE-NAME.
+      *    DISPLAY CURRENT-PROCEDURE-NAME.
            IF (NOT COBLPROG-EOF)
               PERFORM 320-PRINT-PROCEDURE-LINE.
       *
-       310-READ-COBOL-PROGRAM.
-           READ COBLPROG
-           AT END
-              MOVE "Y" TO COBLPROG-EOF-SWITCH.
-      *    
        320-PRINT-PROCEDURE-LINE.
-           MOVE OLD-SEQUENCE-NUMBER TO NEW-SEQUENCE-NUMBER. *> TMP
-           MOVE OLD-PROCEDURE-NAME TO NEW-PROCEDURE-NAME.
-           MOVE NEW-PROCEDURE-INFORMATIONS TO PRINT-AREA.
+           MOVE CURRENT-PROCEDURE-NAME TO PRINT-AREA.
            WRITE PRINT-AREA AFTER ADVANCING 1 LINES.
       *
        400-PRINT-FOOTER-LINE.
            MOVE FOOTER-LINE TO PRINT-AREA.
            WRITE PRINT-AREA AFTER ADVANCING 2 LINES.
       *
-      

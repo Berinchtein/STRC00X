@@ -1,0 +1,307 @@
+      *****************************************************************
+      * Nom du programme:    INTR0005
+      * Auteur original: MANUEL JARRY
+      *
+      * Journal d'entretien
+      * Date       Auteur        Exigence de maintenance
+      * ---------- ------------  --------------------------------------
+      * 15/11/2025 MANUEL JARRY  Créé pour COBOL-Learning
+      *
+      *****************************************************************
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.  INTR0005.
+       AUTHOR. MANUEL JARRY Z85614.
+       INSTALLATION. IBM Z Xplore Learning Platform.
+       DATE-WRITTEN. 15/11/2025.
+       DATE-COMPILED. 24/11/2025.
+       SECURITY. NON-CONFIDENTIAL.
+      *****************************************************************
+      *
+      *****************************************************************
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. IBM-Z.
+       OBJECT-COMPUTER. IBM-Z.
+       INPUT-OUTPUT SECTION.
+      *****************************************************************
+      *
+      *****************************************************************
+       DATA DIVISION.
+       FILE SECTION.
+      *****************************************************************
+       WORKING-STORAGE SECTION.
+      *
+       01 SWITCHES.
+          05 CONFIRM-ENTREE-SWITCH      PIC X          VALUE "N".
+             88 CORRECT-CONFIRM-ENTREE-SWITCH          VALUE
+                   "Y" "N"
+                   "y" "n".
+             88 CONFIRM-ENTREE                         VALUE "Y" "y".
+          05 FIN-DE-SESSION-SWITCH      PIC X          VALUE "N".
+             88 FIN-DE-SESSION                         VALUE "Y".
+          05 ANNULER-SUITE-CALCUL-SWITCH
+                                        PIC X          VALUE "N".
+             88 ANNULER-SUITE-CALCUL                   VALUE "Y".
+      *
+       01 ENTREES-UTILISATEUR.
+          05 VALEURS-MONETAIRES.
+             10 VALEUR-ACTUELLE         PIC 9(9)V99.
+          05 VALEURS-AUTRES.
+             10 VALEUR-ENTREE-FORMATTEE PIC ZZZ,ZZZ,ZZ9.99.
+             10 TAUX-INTERET            PIC 9(2)V99.
+                88 CORRECT-TAUX-INTERET                VALUE 0 THRU 50.
+             10 NOMBRE-ANNEES           PIC 9(3).
+                88 CORRECT-NOMBRE-ANNEES               VALUE 0 THRU 500.
+             10 TYPE-TAUX-INTERET       PIC 9.
+                88 CORRECT-TYPE-TAUX-INTERET           VALUE 1 2 3.
+                88 TYPE-TAUX-INTERET-ANNUEL            VALUE 1.
+                88 TYPE-TAUX-INTERET-MENSUEL           VALUE 2.
+                88 TYPE-TAUX-INTERET-QUOTIDIEN         VALUE 3.
+      *
+       01 VARIABLES-TRAVAIL.
+          05 VALEURS-MONETAIRES.
+             10 VALEUR-FUTURE           PIC 9(9)V99.
+             10 VALEUR-FUTURE-FORMATTEE PIC $$$$,$$$,$$$.99.
+          05 VALEURS-AUTRES.
+             10 BARRE-SEPARATION        PIC X(60)      VALUE ALL "-".
+      *
+       01 DATE-ET-HEURE-ACTUELLE.
+          05 DATE-ACTUELLE.
+             10 DH-ANNEE-ACTUELLE       PIC 9(4).
+             10 DH-MOIS-ACTUEL          PIC 9(2).
+             10 DH-JOUR-ACTUEL          PIC 9(2).
+          05 HEURE-ACTUELLE.
+             10 DH-HEURE-ACTUELLE       PIC 9(2).
+             10 DH-MINUTE-ACTUELLE      PIC 9(2).
+          05 DH-MOIS-ACTUEL-FORMATTE    PIC X(9).
+      *****************************************************************
+      *
+      ******************************************************************
+       PROCEDURE DIVISION.
+      ******************************************************************
+      *  Cette procédure gère l'exécution globale du programme
+      ******************************************************************
+       000-CALCUL-TOTAL-INTERET.
+      *    
+           DISPLAY BARRE-SEPARATION.
+           PERFORM 030-MONTRER-MESSAGE-BIENVENUE.
+           DISPLAY BARRE-SEPARATION.
+           PERFORM 100-CALCUL-UN-INTERET
+              UNTIL(FIN-DE-SESSION).
+           DISPLAY BARRE-SEPARATION.
+           DISPLAY "FIN DU PROGRAMME.".
+           DISPLAY "MERCI D'AVOIR UTILISE LE PROGRAMME DE CALCUL D'INTER
+      -    "ET DE MANU!".
+           DISPLAY BARRE-SEPARATION.
+           STOP RUN.
+      *
+      ******************************************************************
+      *  Cette procédure montre le message de bienvenue du programme
+      ******************************************************************
+       030-MONTRER-MESSAGE-BIENVENUE.
+      *
+           DISPLAY "BIENVENUE DANS LE PROGRAMME DE CALCUL D'INTERET DE M
+      -    "ANU!".
+           MOVE FUNCTION CURRENT-DATE TO DATE-ET-HEURE-ACTUELLE
+           PERFORM 060-INITIALISATION-MOIS-ACTUEL.
+           DISPLAY "NOUS SOMMES PRESENTEMENT LE "
+                   DH-JOUR-ACTUEL
+                   " "
+                   DH-MOIS-ACTUEL-FORMATTE
+                   " "
+                   DH-ANNEE-ACTUELLE
+                   ". IL EST "
+                   DH-HEURE-ACTUELLE
+                   "H"
+                   DH-MINUTE-ACTUELLE
+                   ".".
+      *
+      ******************************************************************
+      *  Cette procédure initialise le mois en format alphabétique
+      ******************************************************************
+       060-INITIALISATION-MOIS-ACTUEL.
+      *
+           EVALUATE DH-MOIS-ACTUEL
+           WHEN 1
+                MOVE "JANVIER" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 2
+                MOVE "FEVRIER" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 3
+                MOVE "MARS" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 4
+                MOVE "AVRIL" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 5
+                MOVE "MAI" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 6
+                MOVE "JUIN" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 7
+                MOVE "JUILLET" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 8
+                MOVE "AOUT" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 9
+                MOVE "SEPTEMBRE" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 10
+                MOVE "OCTOBRE" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 11
+                MOVE "NOVEMBRE" TO DH-MOIS-ACTUEL-FORMATTE
+           WHEN 12
+                MOVE "DECEMBRE" TO DH-MOIS-ACTUEL-FORMATTE
+           END-EVALUATE.
+      *
+      ******************************************************************
+      *  Cette procédure exécute une itération de demandes et de calcul
+      ******************************************************************
+       100-CALCUL-UN-INTERET.
+      *
+           MOVE "N" TO ANNULER-SUITE-CALCUL-SWITCH.
+           PERFORM 200-DMD-VALEUR-ACTUELLE.
+           IF (NOT FIN-DE-SESSION)
+              DISPLAY BARRE-SEPARATION
+              PERFORM 300-DMD-NOMBRE-ANNEES
+              DISPLAY BARRE-SEPARATION
+              PERFORM 400-DMD-TAUX-INTERET
+              DISPLAY BARRE-SEPARATION
+              PERFORM 500-DMD-TYPE-TAUX-INTERET
+              DISPLAY BARRE-SEPARATION
+              PERFORM 800-MONTRER-VALEUR-FUTURE
+              DISPLAY BARRE-SEPARATION
+           END-IF.
+      *
+      ******************************************************************
+      *  Cette procédure demande la valeur actuelle à l'utilisateur
+      ******************************************************************
+       200-DMD-VALEUR-ACTUELLE.
+      *
+           PERFORM
+              WITH TEST AFTER
+              UNTIL(CONFIRM-ENTREE OR FIN-DE-SESSION)
+                   DISPLAY "POUR TERMINER LE PROGRAMME, ENTREZ 0."
+                   DISPLAY "ENTREZ LE MONTANT INITIAL:"
+                   ACCEPT VALEUR-ACTUELLE
+                   MOVE VALEUR-ACTUELLE TO VALEUR-ENTREE-FORMATTEE
+                   IF (VALEUR-ACTUELLE = 0)
+                      MOVE "Y" TO FIN-DE-SESSION-SWITCH
+                   ELSE
+                      MOVE "N" TO FIN-DE-SESSION-SWITCH
+                      PERFORM 230-DMD-CONFIRMATION-VALEUR
+           END-PERFORM.
+      *
+      ******************************************************************
+      *  Cette procédure confirme une valeur entrée avec l'utilisateur
+      ******************************************************************
+       230-DMD-CONFIRMATION-VALEUR.
+      *
+           PERFORM
+              WITH TEST AFTER
+              UNTIL(CORRECT-CONFIRM-ENTREE-SWITCH)
+                   DISPLAY "VOUS AVEZ ENTRE " VALEUR-ENTREE-FORMATTEE
+                   DISPLAY "EST-CE EXACT? (Y/N):"
+                   ACCEPT CONFIRM-ENTREE-SWITCH
+                   IF (NOT CORRECT-CONFIRM-ENTREE-SWITCH)
+                      DISPLAY "ENTREE INCORRECTE. VEUILLEZ REESSAYER."
+                   END-IF
+           END-PERFORM.
+      *
+      ******************************************************************
+      *  Cette procédure demande le nombre d'années à l'utilisateur
+      ******************************************************************
+       300-DMD-NOMBRE-ANNEES.
+      *
+           PERFORM
+              WITH TEST AFTER
+              UNTIL(CORRECT-NOMBRE-ANNEES AND CONFIRM-ENTREE)
+                   DISPLAY "ENTREZ LE NOMBRE D'ANNEES:"
+                   ACCEPT NOMBRE-ANNEES
+                   MOVE NOMBRE-ANNEES TO VALEUR-ENTREE-FORMATTEE
+                   PERFORM 230-DMD-CONFIRMATION-VALEUR
+                   IF (NOT CORRECT-NOMBRE-ANNEES AND CONFIRM-ENTREE)
+                      DISPLAY "NOMBRE D'ANNEES INCORRECT. VEUILLEZ REESS
+      -               "AYER AVEC UN VALEUR ENTRE 0 ET 500."  
+                   END-IF
+           END-PERFORM.
+      *
+      ******************************************************************
+      *  Cette procédure demande le taux d'intérêt à l'utilisateur
+      ******************************************************************
+       400-DMD-TAUX-INTERET.
+      *
+           PERFORM
+              WITH TEST AFTER
+              UNTIL(CORRECT-TAUX-INTERET AND CONFIRM-ENTREE)
+                   DISPLAY "ENTREZ LE TAUX D'INTERET ANNUEL:"
+                   ACCEPT TAUX-INTERET
+                   MOVE TAUX-INTERET TO VALEUR-ENTREE-FORMATTEE
+                   PERFORM 230-DMD-CONFIRMATION-VALEUR
+                   IF (NOT CORRECT-TAUX-INTERET AND CONFIRM-ENTREE)
+                      DISPLAY "TAUX D'INTERET ANNUEL INCORRECT. VEUILLEZ
+      -               " REESSAYER AVEC UNE VALEUR ENTRE 0.00% ET 50.00%"
+                   END-IF
+           END-PERFORM.
+      *
+      ******************************************************************
+      *  Cette procédure demande le type de taux d'intérêt à l'util...
+      ******************************************************************
+       500-DMD-TYPE-TAUX-INTERET.
+      *
+           PERFORM
+              WITH TEST AFTER
+              UNTIL(CORRECT-TYPE-TAUX-INTERET)
+                   DISPLAY "ENTREZ LA FREQUENCE D'APPLICATION DU TAUX D'
+      -            "INTERET:"
+                   DISPLAY "CHOIX POSSIBLES:"
+                   DISPLAY "'1': ANNUELLEMENT, 1 FOIS PAR ANNEE"
+                   DISPLAY "'2': MENSUELLEMENT, 12 FOIS PAR ANNEE"
+                   DISPLAY "'3': QUOTIDIENNEMENT, 365 FOIS PAR ANNEE"
+                   ACCEPT TYPE-TAUX-INTERET
+                   IF (NOT CORRECT-TYPE-TAUX-INTERET)
+                      DISPLAY "FREQUENCE D'APPLICATION DU TAUX D'INTERET
+      -               " INCORRECT. VEUILLEZ REESSAYER AVEC LE BON CHIFFR
+      -               "E."
+                   END-IF
+           END-PERFORM.
+      *
+      ******************************************************************
+      *  Cette procédure calcule la valeur future et la montre
+      ******************************************************************
+       800-MONTRER-VALEUR-FUTURE.
+      *
+           EVALUATE TRUE
+           WHEN TYPE-TAUX-INTERET-ANNUEL 
+                COMPUTE VALEUR-FUTURE =
+                   VALEUR-ACTUELLE *(1 +
+                   TAUX-INTERET / 100) **
+                   NOMBRE-ANNEES
+                ON SIZE ERROR
+                   PERFORM 810-ERREUR-MONTANT-ELEVE
+                END-COMPUTE
+           WHEN TYPE-TAUX-INTERET-MENSUEL
+                COMPUTE VALEUR-FUTURE =
+                   VALEUR-ACTUELLE *(1 +
+                   (TAUX-INTERET / 12) / 100) **
+                   (NOMBRE-ANNEES * 12)
+                ON SIZE ERROR
+                   PERFORM 810-ERREUR-MONTANT-ELEVE
+                END-COMPUTE
+           WHEN TYPE-TAUX-INTERET-QUOTIDIEN 
+                COMPUTE VALEUR-FUTURE =
+                   VALEUR-ACTUELLE *(1 +
+                   (TAUX-INTERET / 365) / 100) **
+                   (NOMBRE-ANNEES * 365)
+                ON SIZE ERROR
+                   PERFORM 810-ERREUR-MONTANT-ELEVE
+                END-COMPUTE
+           END-EVALUATE.
+           IF (NOT ANNULER-SUITE-CALCUL)
+              MOVE VALEUR-FUTURE TO VALEUR-FUTURE-FORMATTEE
+              DISPLAY "LA MONTANT FUTUR SERA: " VALEUR-FUTURE-FORMATTEE
+           END-IF.
+      *
+      ******************************************************************
+      *  Cette procédure recommence le programme en cas d'erreur ON SIZE
+      ******************************************************************
+       810-ERREUR-MONTANT-ELEVE.
+      *
+           DISPLAY "MONTANT CALCULE TROP ELEVE. VEUILLEZ RECOMMENCER.".
+           MOVE "Y" TO ANNULER-SUITE-CALCUL-SWITCH.
+      *
+      
